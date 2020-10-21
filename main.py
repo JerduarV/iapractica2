@@ -11,9 +11,9 @@ def heuristica():
     try:
         estado = request.args.get('estado')
         turno = request.args.get('turno')
-        #print('estado: ')
-        #print(estado)
-        #print('turno: ')
+        print('estado: ')
+        print(estado)
+        print('turno: ')
         print('hola')
         return '52'
     except:
