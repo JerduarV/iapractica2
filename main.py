@@ -14,7 +14,7 @@ def heuristica():
         print('estado: ')
         print(estado)
         print('turno: ')
-        print('hola')
+        print(turno)
         return '52'
     except:
         print('no llegaron parametros')
