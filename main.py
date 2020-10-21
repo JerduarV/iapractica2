@@ -9,8 +9,8 @@ app = Flask(__name__)
 @app.route("/calcular", methods=['GET'])
 def heuristica():
     try:
-        #estado = request.args.get('estado')
-        #turno = request.args.get('turno')
+        estado = request.args.get('estado')
+        turno = request.args.get('turno')
         #print('estado: ')
         #print(estado)
         #print('turno: ')
