@@ -42,17 +42,17 @@ def Validar(tablero, x, y, player, n, dirx, diry):
     return True
 
 def Evaltablero(tablero, player, n):
-    tot = 0
+    total = 0
     for y in range(n):
         for x in range(n):
             if tablero[y][x] == player:
                 if (x == 0 or x == n - 1) and (y == 0 or y == n - 1):
-                    tot += 4
+                    total += 4
                 elif (x == 0 or x == n - 1) or (y == 0 or y == n - 1):
-                    tot += 2
+                    total += 2
                 else:
-                    tot += 1
-    return tot
+                    total += 1
+    return total
 
 
 def IsTerminalNode(tablero, player, n, dirx, diry):
