@@ -11,10 +11,17 @@ def heuristica():
     try:
         estado = request.args.get('estado')
         turno = request.args.get('turno')
-        print('estado: ')
-        print(estado)
-        print('turno: ')
-        print(turno)
+        cad_tablero = str(estado)
+        tablero = []
+        x = 0
+        for x in range(64):
+            fila = []
+            for y in range(8):
+                fila.append(cad_tablero[x])
+                x += 1
+            tablero.append(fila)
+
+        print(tablero)
         return '52'
     except:
         print('no llegaron parametros')
