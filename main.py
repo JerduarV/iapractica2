@@ -8,7 +8,7 @@ app = Flask(__name__)
 
 
 def Mover(tablero, x, y, jugador, direccion_x, direccion_y, n):
-    totctr = 0
+    puntos_acumulados = 0
     tablero[y][x] = jugador
     for d in range(8):
         ctr = 0
@@ -27,8 +27,8 @@ def Mover(tablero, x, y, jugador, direccion_x, direccion_y, n):
             dx = x + direccion_x[d] * (i + 1)
             dy = y + direccion_y[d] * (i + 1)
             tablero[dy][dx] = jugador
-        totctr += ctr
-    return (tablero, totctr)
+        puntos_acumulados += ctr
+    return (tablero, puntos_acumulados)
 
 #Valida qeu los movimiento se puedan realizar
 def Validar(tablero, x, y, jugador, n, direccion_x, direccion_y):
@@ -36,8 +36,8 @@ def Validar(tablero, x, y, jugador, n, direccion_x, direccion_y):
         return False
     if tablero[y][x] != '2':
         return False
-    (tableroTemp, totctr) = Mover(copy.deepcopy(tablero), x, y, jugador, direccion_x, direccion_y, n)
-    if totctr == 0:
+    (tableroTemp, puntos_acumulados) = Mover(copy.deepcopy(tablero), x, y, jugador, direccion_x, direccion_y, n)
+    if puntos_acumulados == 0:
         return False
     return True
 
@@ -55,7 +55,7 @@ def Evaltablero(tablero, jugador, n):
     return total
 
 
-def IsTerminalNode(tablero, jugador, n, direccion_x, direccion_y):
+def EsHoja(tablero, jugador, n, direccion_x, direccion_y):
     for y in range(n):
         for x in range(n):
             if Validar(tablero, x, y, jugador, n, direccion_x, direccion_y):
@@ -63,14 +63,14 @@ def IsTerminalNode(tablero, jugador, n, direccion_x, direccion_y):
     return True
 
 def Minimax(tablero, jugador, nivel, maximizingPlayer, n, direccion_x, direccion_y, minEvaltablero, maxEvaltablero):
-    if nivel == 0 or IsTerminalNode(tablero, jugador, n, direccion_x, direccion_y):
+    if nivel == 0 or EsHoja(tablero, jugador, n, direccion_x, direccion_y):
         return Evaltablero(tablero, jugador, n)
     if maximizingPlayer:
         bestValue = minEvaltablero
         for y in range(n):
             for x in range(n):
                 if Validar(tablero, x, y, jugador, n, direccion_x, direccion_y):
-                    (tableroTemp, totctr) = Mover(copy.deepcopy(tablero), x, y, jugador, direccion_x, direccion_y, n)
+                    (tableroTemp, puntos_acumulados) = Mover(copy.deepcopy(tablero), x, y, jugador, direccion_x, direccion_y, n)
                     v = Minimax(tableroTemp, jugador, nivel - 1, False, n, direccion_x, direccion_y, minEvaltablero, maxEvaltablero)
                     bestValue = max(bestValue, v)
     else:
@@ -78,18 +78,18 @@ def Minimax(tablero, jugador, nivel, maximizingPlayer, n, direccion_x, direccion
         for y in range(n):
             for x in range(n):
                 if Validar(tablero, x, y, jugador, n, direccion_x, direccion_y):
-                    (tableroTemp, totctr) = Mover(copy.deepcopy(tablero), x, y, jugador, direccion_x, direccion_y, n)
+                    (tableroTemp, puntos_acumulados) = Mover(copy.deepcopy(tablero), x, y, jugador, direccion_x, direccion_y, n)
                     v = Minimax(tableroTemp, jugador, nivel - 1, True, n, direccion_x, direccion_y, minEvaltablero, maxEvaltablero)
                     bestValue = min(bestValue, v)
     return bestValue
 
-def BestMove(tablero, jugador, n, direccion_x,direccion_y,nivel, minEvaltablero, maxEvaltablero):
+def MejorJugada(tablero, jugador, n, direccion_x,direccion_y,nivel, minEvaltablero, maxEvaltablero):
     maxPoints = 0
     mx = -1; my = -1
     for y in range(n):
         for x in range(n):
             if Validar(tablero, x, y, jugador, n, direccion_x, direccion_y):
-                (tableroTemp, totctr) = Mover(copy.deepcopy(tablero), x, y, jugador, direccion_x, direccion_y, n)
+                (tableroTemp, puntos_acumulados) = Mover(copy.deepcopy(tablero), x, y, jugador, direccion_x, direccion_y, n)
                 points = Minimax(tableroTemp, jugador, nivel, True, n, direccion_x, direccion_y, minEvaltablero, maxEvaltablero)
                 if points > maxPoints:
                     maxPoints = points
@@ -113,15 +113,15 @@ def Inicializar(turno, estado):
     direccion_y = [-1, -1, -1, 0, 0, 1, 1, 1]
     
     nivel = 3
-    (x, y) = BestMove(tablero, turno, n, direccion_x,direccion_y,nivel, minEvaltablero, maxEvaltablero)
+    (x, y) = MejorJugada(tablero, turno, n, direccion_x,direccion_y,nivel, minEvaltablero, maxEvaltablero)
     if not (x == -1 and y == -1):
-        (tablero, totctr) = Mover(tablero, x, y, turno, direccion_x, direccion_y, n)
+        (tablero, puntos_acumulados) = Mover(tablero, x, y, turno, direccion_x, direccion_y, n)
 
     res=str(y)+str(x)
     return res
 
 @app.route("/calcular", methods=['GET'])
-def heuristica():
+def MinMaxApi():
     try:
         estado = request.args.get('estado')
         turno = request.args.get('turno')
