@@ -12,7 +12,7 @@ def heuristica():
         estado = request.args.get('estado')
         turno = request.args.get('turno')
         cad_tablero = str(estado)
-        # tablero = []
+        tablero = []
         # x = 0
         # for x in range(64):
         #     fila = []
