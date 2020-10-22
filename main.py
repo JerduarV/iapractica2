@@ -21,7 +21,7 @@ def heuristica():
         #         x += 1
         #     tablero.append(fila)
 
-        print(tablero)
+        #print(tablero)
         return '52'
     except:
         print('no llegaron parametros')
