@@ -7,9 +7,9 @@ from flask import Flask, render_template, request, redirect
 app = Flask(__name__)
 
 
-def Mover(board, x, y, player, dirx, diry, n):
+def Mover(tablero, x, y, player, dirx, diry, n):
     totctr = 0
-    board[y][x] = player
+    tablero[y][x] = player
     for d in range(8):
         ctr = 0
         for i in range(8):
@@ -17,34 +17,35 @@ def Mover(board, x, y, player, dirx, diry, n):
             dy = y + diry[d] * (i + 1)
             if dx < 0 or dx > n - 1 or dy < 0 or dy > n - 1:
                 ctr = 0; break
-            elif board[dy][dx] == player:
+            elif tablero[dy][dx] == player:
                 break
-            elif board[dy][dx] == '2':
+            elif tablero[dy][dx] == '2':
                 ctr = 0; break
             else:
                 ctr += 1
         for i in range(ctr):
             dx = x + dirx[d] * (i + 1)
             dy = y + diry[d] * (i + 1)
-            board[dy][dx] = player
+            tablero[dy][dx] = player
         totctr += ctr
-    return (board, totctr)
+    return (tablero, totctr)
 
-def ValidMove(board, x, y, player, n, dirx, diry):
+#Valida qeu los movimiento se puedan realizar
+def Validar(tablero, x, y, player, n, dirx, diry):
     if x < 0 or x > n - 1 or y < 0 or y > n - 1:
         return False
-    if board[y][x] != '2':
+    if tablero[y][x] != '2':
         return False
-    (boardTemp, totctr) = Mover(copy.deepcopy(board), x, y, player, dirx, diry, n)
+    (tableroTemp, totctr) = Mover(copy.deepcopy(tablero), x, y, player, dirx, diry, n)
     if totctr == 0:
         return False
     return True
 
-def EvalBoard(board, player, n):
+def Evaltablero(tablero, player, n):
     tot = 0
     for y in range(n):
         for x in range(n):
-            if board[y][x] == player:
+            if tablero[y][x] == player:
                 if (x == 0 or x == n - 1) and (y == 0 or y == n - 1):
                     tot += 4
                 elif (x == 0 or x == n - 1) or (y == 0 or y == n - 1):
@@ -54,48 +55,48 @@ def EvalBoard(board, player, n):
     return tot
 
 
-def IsTerminalNode(board, player, n, dirx, diry):
+def IsTerminalNode(tablero, player, n, dirx, diry):
     for y in range(n):
         for x in range(n):
-            if ValidMove(board, x, y, player, n, dirx, diry):
+            if Validar(tablero, x, y, player, n, dirx, diry):
                 return False
     return True
 
-def Minimax(board, player, depth, maximizingPlayer, n, dirx, diry, minEvalBoard, maxEvalBoard):
-    if depth == 0 or IsTerminalNode(board, player, n, dirx, diry):
-        return EvalBoard(board, player, n)
+def Minimax(tablero, player, depth, maximizingPlayer, n, dirx, diry, minEvaltablero, maxEvaltablero):
+    if depth == 0 or IsTerminalNode(tablero, player, n, dirx, diry):
+        return Evaltablero(tablero, player, n)
     if maximizingPlayer:
-        bestValue = minEvalBoard
+        bestValue = minEvaltablero
         for y in range(n):
             for x in range(n):
-                if ValidMove(board, x, y, player, n, dirx, diry):
-                    (boardTemp, totctr) = Mover(copy.deepcopy(board), x, y, player, dirx, diry, n)
-                    v = Minimax(boardTemp, player, depth - 1, False, n, dirx, diry, minEvalBoard, maxEvalBoard)
+                if Validar(tablero, x, y, player, n, dirx, diry):
+                    (tableroTemp, totctr) = Mover(copy.deepcopy(tablero), x, y, player, dirx, diry, n)
+                    v = Minimax(tableroTemp, player, depth - 1, False, n, dirx, diry, minEvaltablero, maxEvaltablero)
                     bestValue = max(bestValue, v)
     else:
-        bestValue = maxEvalBoard
+        bestValue = maxEvaltablero
         for y in range(n):
             for x in range(n):
-                if ValidMove(board, x, y, player, n, dirx, diry):
-                    (boardTemp, totctr) = Mover(copy.deepcopy(board), x, y, player, dirx, diry, n)
-                    v = Minimax(boardTemp, player, depth - 1, True, n, dirx, diry, minEvalBoard, maxEvalBoard)
+                if Validar(tablero, x, y, player, n, dirx, diry):
+                    (tableroTemp, totctr) = Mover(copy.deepcopy(tablero), x, y, player, dirx, diry, n)
+                    v = Minimax(tableroTemp, player, depth - 1, True, n, dirx, diry, minEvaltablero, maxEvaltablero)
                     bestValue = min(bestValue, v)
     return bestValue
 
-def BestMove(board, player, n, dirx,diry,depth, minEvalBoard, maxEvalBoard):
+def BestMove(tablero, player, n, dirx,diry,depth, minEvaltablero, maxEvaltablero):
     maxPoints = 0
     mx = -1; my = -1
     for y in range(n):
         for x in range(n):
-            if ValidMove(board, x, y, player, n, dirx, diry):
-                (boardTemp, totctr) = Mover(copy.deepcopy(board), x, y, player, dirx, diry, n)
-                points = Minimax(boardTemp, player, depth, True, n, dirx, diry, minEvalBoard, maxEvalBoard)
+            if Validar(tablero, x, y, player, n, dirx, diry):
+                (tableroTemp, totctr) = Mover(copy.deepcopy(tablero), x, y, player, dirx, diry, n)
+                points = Minimax(tableroTemp, player, depth, True, n, dirx, diry, minEvaltablero, maxEvaltablero)
                 if points > maxPoints:
                     maxPoints = points
                     mx = x; my = y
     return (mx, my)
 
-def iniciaIA(turno, estado):
+def Inicializar(turno, estado):
     n = 8
     filas=[]
     columnas=[]
@@ -104,17 +105,17 @@ def iniciaIA(turno, estado):
         for y in range(8):
             filas.append(estado[(x*n)+y])
         columnas.append(filas)
-    board=columnas
+    tablero=columnas
 
-    minEvalBoard = -1
-    maxEvalBoard = n * n + 4 * n + 4 + 1
+    minEvaltablero = -1
+    maxEvaltablero = n * n + 4 * n + 4 + 1
     dirx = [-1, 0, 1, -1, 1, -1, 0, 1]
     diry = [-1, -1, -1, 0, 0, 1, 1, 1]
     
     depth = 3
-    (x, y) = BestMove(board, turno, n, dirx,diry,depth, minEvalBoard, maxEvalBoard)
+    (x, y) = BestMove(tablero, turno, n, dirx,diry,depth, minEvaltablero, maxEvaltablero)
     if not (x == -1 and y == -1):
-        (board, totctr) = Mover(board, x, y, turno, dirx, diry, n)
+        (tablero, totctr) = Mover(tablero, x, y, turno, dirx, diry, n)
 
     res=str(y)+str(x)
     return res
@@ -124,7 +125,7 @@ def heuristica():
     try:
         estado = request.args.get('estado')
         turno = request.args.get('turno')
-        result= iniciaIA(str(turno), str(estado))
+        result= Inicializar(str(turno), str(estado))
         print(result)
         return result
     except:
